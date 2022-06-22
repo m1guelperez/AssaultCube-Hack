@@ -3,6 +3,7 @@
 #include <string>
 #include <tlhelp32.h>
 #include "utils.h"
+#include "aimbot.h"
 
 int main() {
 
@@ -11,6 +12,8 @@ int main() {
 	std::vector<unsigned int> currWeaponReserveAmmo = { 0x384,0x10,0x0 };
 	std::vector<unsigned int> health = { 0xF8 };
 	std::vector<unsigned int> grenades = { 0x368,0x14,0x0 };
+	std::vector<unsigned int> viewAngleHor = { 0x40 };
+	std::vector<unsigned int> viewAngleVer = { 0x44 };
 
 
 
@@ -32,12 +35,13 @@ int main() {
 	uintptr_t reserveAmmoPtr = utils::findDMAAddy(hProcess, basePtr, currWeaponReserveAmmo, "Current weapon reserve Ammo");
 	uintptr_t healthPtr = utils::findDMAAddy(hProcess, basePtr, health, "Health");
 	uintptr_t grenadePtr = utils::findDMAAddy(hProcess, basePtr, grenades, "Grenades");
+	uintptr_t viewAngleVerPtr = utils::findDMAAddy(hProcess, basePtr, viewAngleVer, "ViewAngle Vertical");
 
 	int ammoRead = 0;
 	int ammoTemp = 0;
-	const int setAmmo = 123;
+	const int setAmmo = 33;
 	int reserveAmmoRead = 0;
-	const int setReserveAmmo = 444;
+	const int setReserveAmmo = 123;
 	int healthRead = 100;
 	const int setHealth = 987;
 	int grenadesRead = 0;
@@ -45,7 +49,8 @@ int main() {
 
 	bool pressed = false;
 	bool activated = false;
-
+	bool aimbotFlag = true;
+	float temp = 0.0f;
 
 	while (true)
 	{
@@ -66,7 +71,6 @@ int main() {
 		else if (((GetAsyncKeyState(VK_BACK) && 0x8000) == 0) && pressed)
 		{
 			pressed = false;
-			std::cout << "TAB released" << std::endl;
 		}
 
 		if (activated)
@@ -76,6 +80,8 @@ int main() {
 			ReadProcessMemory(hProcess, (BYTE*)healthPtr, &healthRead, sizeof(int), nullptr);
 			ReadProcessMemory(hProcess, (BYTE*)grenadePtr, &grenadesRead, sizeof(int), nullptr);
 
+			//TODO: Overhaul
+			noRecoil(hProcess, viewAngleVerPtr, aimbotFlag,temp);
 			if (ammoRead != ammoTemp)
 			{
 				std::cout << "Ammo: " << std::dec << ammoRead << std::endl;

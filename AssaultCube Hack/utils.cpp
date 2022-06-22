@@ -3,6 +3,7 @@
 #include <string>
 #include <tlhelp32.h>
 #include <vector>
+#include "utils.h"
 
 namespace utils {
 	DWORD getProcID(const wchar_t* procName) {
@@ -87,6 +88,18 @@ namespace utils {
 		}
 		else {
 			std::cout << "Opened process successfully with PID: " << std::dec << procID << std::endl;
+		}
+	}
+
+	void buttonPressed(int key) {
+		bool pressed = false;
+		if ((GetAsyncKeyState(VK_BACK) && 0x8000) && !pressed) {
+			pressed = true;
+		}
+		//Check if MSB is 0 (button is not down)
+		else if (((GetAsyncKeyState(VK_BACK) && 0x8000) == 0) && pressed)
+		{
+			pressed = false;
 		}
 	}
 }
