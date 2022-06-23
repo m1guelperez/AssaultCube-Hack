@@ -7,9 +7,8 @@
 
 namespace utils {
 	DWORD getProcID(const wchar_t* procName) {
-
 		DWORD procID = 0;
-		PROCESSENTRY32 pe32;
+		PROCESSENTRY32 pe32{};
 
 		//Create a snapshot of all processes.
 		HANDLE snapshot{};
@@ -36,14 +35,16 @@ namespace utils {
 		else {
 			std::cout << "Process32First failed " << GetLastError() << std::endl;
 		}
-		CloseHandle(snapshot);
+		if (snapshot != NULL)
+		{
+			CloseHandle(snapshot);
+		}
 		return procID;
 	}
 
 
 	uintptr_t getModuleBaseAddress(DWORD procID, const wchar_t* modName) {
-
-		MODULEENTRY32 m32;
+		MODULEENTRY32 m32{};
 		uintptr_t baseMod = 0;
 
 		HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, procID);
@@ -69,7 +70,7 @@ namespace utils {
 		return baseMod;
 	}
 
-	uintptr_t findDMAAddy(HANDLE hproc, uintptr_t ptr, std::vector<unsigned int> offsets, std::string name) {
+	uintptr_t calculatePtrAddress(HANDLE hproc, uintptr_t ptr, std::vector<unsigned int> offsets, std::string name) {
 		uintptr_t addr = ptr;
 		//iteratively adds the offset to addr and stores it back into addr.
 		for (unsigned int i = 0; i < offsets.size(); ++i) {

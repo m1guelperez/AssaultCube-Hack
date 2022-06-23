@@ -1,20 +1,37 @@
 #include "aimbot.h"
 #include <Windows.h>
 #include <iostream>
+#include <stdint.h>
 
-void noRecoil(HANDLE& hProcess, uintptr_t baseAddress, bool toggleFlag, float& temp) {
+void noRecoil(HANDLE& hProcess, uintptr_t baseAddress[], bool toggleFlag, float& temp) {
 
-	float currAngleVerRead = 0.0f;
-	
-	if ((GetAsyncKeyState(VK_LBUTTON) && 0x8000) == 0)
+	//TODO: This function might be valuable for the aimbot
+	/*float currAngleVerRead = 0.0f;
+	if (toggleFlag)
 	{
-		ReadProcessMemory(hProcess, (BYTE*)baseAddress, &currAngleVerRead, sizeof(float), nullptr);
-		temp = currAngleVerRead;
-	}
-	else if ((GetAsyncKeyState(VK_LBUTTON) && 0x8000))
+
+		if ((GetAsyncKeyState(VK_LBUTTON) && 0x8000) == 0)
+		{
+			ReadProcessMemory(hProcess, (BYTE*)baseAddress, &currAngleVerRead, sizeof(float), nullptr);
+			temp = currAngleVerRead;
+		}
+		else if ((GetAsyncKeyState(VK_LBUTTON) && 0x8000))
+		{
+			WriteProcessMemory(hProcess, (BYTE*)baseAddress, &temp, sizeof(float), nullptr);
+		}
+	}*/
+
+	//UINT16 since we interact with a 2byte value
+	UINT16 setRecoil = 0;
+	if (toggleFlag)
 	{
-		WriteProcessMemory(hProcess, (BYTE*)baseAddress, &temp, sizeof(float), nullptr);
+		if ((GetAsyncKeyState(VK_LBUTTON) && 0x8000))
+		{
+			WriteProcessMemory(hProcess, (BYTE*)baseAddress[0], &setRecoil, sizeof(UINT16), nullptr);
+			WriteProcessMemory(hProcess, (BYTE*)baseAddress[1], &setRecoil, sizeof(UINT16), nullptr);
+		}
 	}
+
 }
 
 

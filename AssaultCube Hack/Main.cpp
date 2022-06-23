@@ -4,16 +4,23 @@
 #include <tlhelp32.h>
 #include "utils.h"
 #include "aimbot.h"
+#include "player.h"
 
 int main() {
 
 	//Offsets as vectors
-	std::vector<unsigned int> currWeaponAmmo = { 0x384,0x14,0x0 };
+	std::vector<unsigned int> currWeaponAmmo = { 0x374,0x14,0x0 };
 	std::vector<unsigned int> currWeaponReserveAmmo = { 0x384,0x10,0x0 };
 	std::vector<unsigned int> health = { 0xF8 };
 	std::vector<unsigned int> grenades = { 0x368,0x14,0x0 };
 	std::vector<unsigned int> viewAngleHor = { 0x40 };
 	std::vector<unsigned int> viewAngleVer = { 0x44 };
+	std::vector<unsigned int> recoil1 = { 0x374, 0xC, 0x120 };
+	std::vector<unsigned int> recoil2 = { 0x374, 0xC, 0x122 };
+
+	//TODO: Make all individual hack functions toggable
+	player::Player player{};
+	player.noRecoilToggle = true;
 
 
 
@@ -31,11 +38,15 @@ int main() {
 	utils::checkIfProcessOpened(hProcess, procID);
 
 	//Resolve pointer chain
-	uintptr_t ammoPtr = utils::findDMAAddy(hProcess, basePtr, currWeaponAmmo, "Current Weapon Ammo");
-	uintptr_t reserveAmmoPtr = utils::findDMAAddy(hProcess, basePtr, currWeaponReserveAmmo, "Current weapon reserve Ammo");
-	uintptr_t healthPtr = utils::findDMAAddy(hProcess, basePtr, health, "Health");
-	uintptr_t grenadePtr = utils::findDMAAddy(hProcess, basePtr, grenades, "Grenades");
-	uintptr_t viewAngleVerPtr = utils::findDMAAddy(hProcess, basePtr, viewAngleVer, "ViewAngle Vertical");
+	uintptr_t ammoPtr = utils::calculatePtrAddress(hProcess, basePtr, currWeaponAmmo, "Current Weapon Ammo");
+	uintptr_t reserveAmmoPtr = utils::calculatePtrAddress(hProcess, basePtr, currWeaponReserveAmmo, "Current weapon reserve Ammo");
+	uintptr_t healthPtr = utils::calculatePtrAddress(hProcess, basePtr, health, "Health");
+	uintptr_t grenadePtr = utils::calculatePtrAddress(hProcess, basePtr, grenades, "Grenades");
+	uintptr_t viewAngleVerPtr = utils::calculatePtrAddress(hProcess, basePtr, viewAngleVer, "ViewAngle Vertical");
+	//Need to recoil values. One is for the initial recoil and the second for sustained fire
+	uintptr_t recoilPtr1 = utils::calculatePtrAddress(hProcess, basePtr, recoil1, "Recoil1");
+	uintptr_t recoilPtr2 = utils::calculatePtrAddress(hProcess, basePtr, recoil2, "Recoil2");
+	uintptr_t recoilArr[2] = {recoilPtr1,recoilPtr2};
 
 	int ammoRead = 0;
 	int ammoTemp = 0;
@@ -49,9 +60,9 @@ int main() {
 
 	bool pressed = false;
 	bool activated = false;
-	bool aimbotFlag = true;
 	float temp = 0.0f;
 
+	//TODO: Refactor the loop and add more key-shortcut support.
 	while (true)
 	{
 		//Check if MSB is 1 (button is down)
@@ -73,6 +84,26 @@ int main() {
 			pressed = false;
 		}
 
+		/*if ((GetAsyncKeyState(VK_CONTROL) && 0x8000) && (GetAsyncKeyState(0x4F) && 0x8000) && !pressed) {
+			pressed = true;
+			std::cout << "here" << std::endl;
+			if (!player.noRecoilToggle)
+			{
+				player.noRecoilToggle = true;
+				std::cout << "NoRecoil activated" << std::endl;
+			}
+			else {
+				player.noRecoilToggle = false;
+				std::cout << "NoRecoil deactivated" << std::endl;
+			}
+		}
+		else if (((GetAsyncKeyState(VK_CONTROL) && 0x8000) == 0 && (GetAsyncKeyState(0x4F) && 0x8000) == 0) && pressed)
+		{
+			std::cout << "here lol" << std::endl;
+			pressed = false;
+		}*/
+
+
 		if (activated)
 		{
 			ReadProcessMemory(hProcess, (BYTE*)ammoPtr, &ammoRead, sizeof(int), nullptr);
@@ -81,7 +112,7 @@ int main() {
 			ReadProcessMemory(hProcess, (BYTE*)grenadePtr, &grenadesRead, sizeof(int), nullptr);
 
 			//TODO: Overhaul
-			noRecoil(hProcess, viewAngleVerPtr, aimbotFlag,temp);
+			noRecoil(hProcess, recoilArr, true, temp);
 			if (ammoRead != ammoTemp)
 			{
 				std::cout << "Ammo: " << std::dec << ammoRead << std::endl;

@@ -12,10 +12,8 @@ namespace utils {
 	uintptr_t getModuleBaseAddress(DWORD procID, const wchar_t* modName);
 
 	//Adds pointer offsets together, starting from our base address to interact with the needed memory address
-	uintptr_t findDMAAddy(HANDLE hproc, uintptr_t ptr, std::vector<unsigned int> offsets, std::string name);
+	uintptr_t calculatePtrAddress(HANDLE hproc, uintptr_t ptr, std::vector<unsigned int> offsets, std::string name);
 
 	//Check if the process opened successfully
 	void checkIfProcessOpened(HANDLE& hprocess, DWORD& procID);
-
-	void buttonPressed(int key);
 }
