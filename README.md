@@ -8,10 +8,12 @@ Currently this project is _WIP_ and the code itself is pretty messy.
 
 ## Roadmap
 
-* [x] Infinite health
+* [x] Infinite Health
 * [x] Unlimited Ammo
-  * [x] Unlimited grenades
+  * [x] Unlimited Grenades
 * [x] No clip
 * [ ] Flying
-* [ ] Teleport
+* [ ] Teleporting
+* [ ] Player attributes
+  * [ ] ESP
 * [ ] Online-Support
