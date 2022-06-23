@@ -10,8 +10,8 @@ Currently this project is _WIP_ and the code itself is pretty messy.
 
 * [x] Infinite Health
 * [x] Unlimited Ammo
-  * [x] Unlimited Grenades
-* [x] No clip
+* [x] Unlimited Grenades
+* [x] NoClip
 * [ ] Flying
 * [ ] Teleporting
 * [ ] Player attributes
